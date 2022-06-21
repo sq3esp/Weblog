@@ -1,2 +1,2 @@
 # Weblog
- Projekt na Języki Skrypote
+ Projekt na Języki Skrypowe
