@@ -14,86 +14,83 @@ db = SQLAlchemy(app)
 loggedIn = False
 username = ""
 
-
-class Post(db.Model):
+ 
+class Post(db.Model): # class for the posts table
     __tablename__ = 'posts'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text, nullable=False)
-    content = db.Column(db.Text, nullable=False)
+    id = db.Column(db.Integer, primary_key=True) # id column
+    title = db.Column(db.Text, nullable=False) # title column (obligatory)
+    content = db.Column(db.Text, nullable=False) # content column (obligatory)
     date_posted = db.Column(db.Text, nullable=False,
-                            default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    latitude = db.Column(db.Float, nullable=True)
-    longitude = db.Column(db.Float, nullable=True)
+                            default=datetime.now().strftime("%Y-%m-%d %H:%M:%S")) # date posted column is automatically generated
+    latitude = db.Column(db.Float, nullable=True) # latitude column (optional)
+    longitude = db.Column(db.Float, nullable=True) # longitude column (optional)
 
-    def __init__(self, title, content, latitude, longitude):
+    def __init__(self, title, content, latitude, longitude): # constructor for the class
         self.title = title
         self.content = content
         self.latitude = latitude
         self.longitude = longitude
 
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    password = db.Column(db.String(100))
-    login = db.Column(db.String(1000))
+class User(db.Model): # class for the users table
+    id = db.Column(db.Integer, primary_key=True) # id column
+    password = db.Column(db.String(100)) # password column - hash of the password
+    login = db.Column(db.String(1000)) # login column
 
-    def __init__(self, login, password):
+    def __init__(self, login, password): # constructor for the class
         self.login = login
         self.password = password
 
-
-db.create_all()
+ 
+db.create_all() # create the tables
 
 
 @app.route("/")
 def main():
-    lat, lon = api.get_location()
+    lat, lon = api.get_location() 
     weather = api.get_weather(lat, lon)
     quote = api.get_random_quote()
     posts = Post.query.all()
-    posts.sort(key=lambda x: x.id, reverse=True)
+    posts.sort(key=lambda x: x.id, reverse=True) # sort the posts by id in descending order
     for post in posts:  # add weather to posts
-        if post.latitude is not None and post.longitude is not None:
-            post.weather = api.get_weather(post.latitude, post.longitude)
+        if post.latitude is not None and post.longitude is not None: # if the post has coordinates
+            post.weather = api.get_weather(post.latitude, post.longitude) # add weather to the post
         else:
             post.weather = None
-    for post in posts:
-        print(post.weather)
     return render_template('main.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], posts=posts, loggedIn=loggedIn, username=username)
 
 
 @app.route('/favicon.ico')
 def favicon():  # favicon for browser
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon') 
 
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-
-@app.route("/add", methods=["POST", "GET"])
+@app.route("/add", methods=["POST", "GET"]) 
 def add():  # add post
-    if not loggedIn:
-        lat, lon = api.get_location()
+    if not loggedIn: # if the user is not logged in
+        lat, lon = api.get_location() 
         weather = api.get_weather(lat, lon)
         quote = api.get_random_quote()
         return render_template('unauthorized.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], loggedIn=loggedIn, username=username)
     underForm = " "
-    if request.method == "POST":
+    if request.method == "POST": # if the user submitted the form
         title = request.form["title"]
         content = request.form["content"]
         checkbox = request.form.getlist("checkbox")
-        if checkbox:
+        if checkbox: # if the user checked the checkbox
             latitude = request.form["latitude"]
             longitude = request.form["longitude"]
         else:
             latitude = None
             longitude = None
-        post = Post(title, content, latitude, longitude)
-        db.session.add(post)
-        try:
-            db.session.commit()
-            id = post.id
-            uploaded_file = request.files['file']
-            if uploaded_file.filename != '':
-                uploaded_file.save("static/images/"+str(id)+".png")
+        post = Post(title, content, latitude, longitude) # create a new post
+        db.session.add(post) 
+        try: # try to commit the changes to the database
+            db.session.commit() # commit the changes to the database
+            id = post.id # get the id of the post
+            uploaded_file = request.files['file'] # get the file
+            if uploaded_file.filename != '': # if the user uploaded a file
+                uploaded_file.save("static/images/"+str(id)+".png") # save the file
             underForm = "Dodano pomyślnie"
         except Exception as e:
             print(e)
@@ -106,17 +103,17 @@ def add():  # add post
 
 
 @app.route('/login', methods=['POST', 'GET'])
-def login():
-    if request.method == 'POST':
+def login(): # login page
+    if request.method == 'POST': # if the user submitted the form
         login = request.form['login']
         password = request.form['password']
-        user = User.query.filter_by(login=login).first()
-        hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
-        if user and user.password == hash:
+        user = User.query.filter_by(login=login).first() # get the user with the given login
+        hash = hashlib.sha256(password.encode('utf-8')).hexdigest() # hash the password
+        if user and user.password == hash: # if the user exists and the password is correct
             global loggedIn
-            loggedIn = True
+            loggedIn = True # set the loggedIn variable to True
             global username
-            username = user.login
+            username = user.login   # set the username variable to the login of the user
 
     lat, lon = api.get_location()
     weather = api.get_weather(lat, lon)
@@ -125,27 +122,26 @@ def login():
 
 
 @app.route('/signup', methods=['POST', 'GET'])
-def signup():
-    if request.method == 'POST':
+def signup(): # signup page (used to create a new user)
+    if request.method == 'POST': # if the user submitted the form
         login = request.form['login']
         password = request.form['password']
-        hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
-        # add user to database
-        user = User(login, hash)
+        hash = hashlib.sha256(password.encode('utf-8')).hexdigest() # hash the password
+        user = User(login, hash) # create a new user
         db.session.add(user)
         try:
-            db.session.commit()
+            db.session.commit() # commit the changes to the database
             global loggedIn
-            loggedIn = True
+            loggedIn = True # set the user as logged in
             global username
-            username = user.login
-            return redirect(url_for('login'))
-        except Exception as e:
+            username = user.login # set the username
+            return redirect(url_for('login')) # redirect to the login page
+        except Exception as e: # if the user already exists
             print(e)
             lat, lon = api.get_location()
             weather = api.get_weather(lat, lon)
             quote = api.get_random_quote()
-            return render_template('signup.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], loggedIn=loggedIn, username=username, underForm="Podczas rejestracji wystąpił błąd")
+            return render_template('signup.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], loggedIn=loggedIn, username=username, underForm="Podczas rejestracji wystąpił błąd, najprawdopodobnie użytkownik o takim loginie już istnieje")
 
     lat, lon = api.get_location()
     weather = api.get_weather(lat, lon)
@@ -154,16 +150,16 @@ def signup():
 
 
 @app.route('/logout')
-def logout():
+def logout(): # logout page
     global loggedIn
-    loggedIn = False
+    loggedIn = False # set the user as logged out
     global username
-    username = None
-    return redirect(url_for('main'))
+    username = None  # set the username to None
+    return redirect(url_for('main')) # redirect to the main page
 
 
 @app.route('/unauthorized')
-def unauthorized():
+def unauthorized(): # unauthorized page
     lat, lon = api.get_location()
     weather = api.get_weather(lat, lon)
     quote = api.get_random_quote()
