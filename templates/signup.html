@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>{{ underForm }}</h1>
+  {% if loggedIn == False %}
+  <h2>Zarejestruj się</h2>
+  <form action="{{ url_for('signup') }}" method="post">
+    <label for="login">Login</label>
+    <br>
+    <input type="text" class="form-control" id="login" name="login" placeholder="Login">
+    <br>
+    <label for="password">Password</label>
+    <br>
+    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+    <br>
+    <button type="submit" class="submitButton">Zarejestruj</button>
+    {% endif %}
+</div>
+{% endblock %}

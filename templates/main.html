@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div id="map"></div>
+</div>
+{% for post in posts %}
+<div class="card">
+  <h1>{{ post.title }}</h1>
+  <h5>{{ post.date_posted }}</h5>
+  <img class="image" src="static/images/{{ post.id }}.png" onerror="this.style.display='none'">
+  <p>{{ post.content }}</p>
+  {% if post.weather %}
+  <hr>
+  <span class="subtitle">{{ post.weather.0 }}</span>
+  <span class="subtitle"> {{ post.weather.2 }}&deg;C</span>
+  <img src="http://openweathermap.org/img/w/{{ icon }}.png">
+  {{ post.weather.3 }}
+  {% endif %}
+
+
+</div>
+{% endfor %}
+<script>
+  var map = L.map('map', { center: [{{ lat }}, {{ lon }}], zoom: 2 });
+  {% for post in posts %}
+  {% if post.latitude and post.longitude %}
+  L.marker([{{ post.latitude }}, {{ post.longitude }}]).addTo(map).bindPopup("{{post.title}}");
+  {% endif %}
+  {% endfor %}
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Weblog</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/test.css') }}" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+</head>
+
+<body>
+    <div class="header">
+        <ul class="horizontal">
+            <li>
+                <a class="active" href="{{ url_for('main') }}">Strona główna</a>
+            </li>
+            {% if loggedIn %}
+            <li>
+                <a href="{{ url_for('add') }}">Dodaj post</a>
+            </li>
+            {% endif %}
+            {% if loggedIn %}
+            <li class="rightli" style="float:right">
+                <a href="{{ url_for('logout') }}">Zalogowano jako {{username}}, Wyloguj</a>
+            </li>
+            {% else %}
+            <li class="rightli" style="float:right">
+                <a href="{{ url_for('login') }}">Zaloguj</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="row">
+        <div class="leftcolumn">
+            {% block content %}{% endblock %}
+        </div>
+        <div class="rightcolumn">
+            <div class="card">
+                <h3>"{{ quote }}"</h3>
+                <h5>~{{ author }}</h5>
+            </div>
+            <div class="card">
+                <h2>O projekcie</h2>
+                <img class="blog-image" src="{{ url_for('static', filename='images/blog-image.jpg') }}">
+                <p>Ta strona internetowa została stworzona jako projekt z Języków Skryptowych</p>
+            </div>
+            <div class="card">
+                <article class="media">
+                    <img class="weather-icon" src="http://openweathermap.org/img/w/{{ icon }}.png">
+                    <div class="content">
+                        <span class="title">{{ city }}</span>
+                        <br>
+                        <span class="subtitle">{{ temperature }}°C</span>
+                        <br>
+                        {{ description }}
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <h5>Wykonano przez Tomasza Płóciennika 260404</h5>
+    </div>
+</body>
+
+</html>

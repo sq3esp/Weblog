@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  {% if loggedIn == True %}
+  <h1>Zalogowano jako {{username}}</h1>
+  {% endif %}
+
+  {% if loggedIn == False %}
+  <h2>Zaloguj się</h2>
+  <form action="{{ url_for('login') }}" method="post">
+    <label for="login">Login</label>
+    <br>
+    <input type="text" class="form-control" id="login" name="login" placeholder="Login">
+    <br>
+    <label for="password">Password</label>
+    <br>
+    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+    <br>
+    <button type="submit" class="submitButton">Zaloguj</button>
+    {% endif %}
+</div>
+{% endblock %}

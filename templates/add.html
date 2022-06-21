@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>{{ underForm }}</h1>
+  <h2>Dodaj nowy wpis</h2>
+  <form action="{{ url_for('add') }}" method="post" enctype='multipart/form-data'>
+    <label for="title">Tytuł</label>
+    <br>
+    <input type="text" class="form-control" id="title" name="title" placeholder="Tytuł">
+    <br>
+    <label for="content">Treść</label>
+    <br>
+    <textarea class="form-control" id="content" name="content" rows="3"></textarea>
+    <br>
+    <label for="file">Prześlij grafikę:</label>
+    <br>
+    <input type="file" name="file">
+    <br>
+    <input type="checkbox" id="checkbox" onclick="checkboxClicked()" name="checkbox">
+    Chcę podać lokalizację
+    <br>
+    <div id="loc">
+      <label for="lat">Szerokość geograficzna</label>
+      <br>
+      <input type="text" class="form-control" id="lat" name="latitude" placeholder="Szerokość geograficzna">
+      <br>
+      <label for="lon">Długość geograficzna</label>
+      <br>
+      <input type="text" class="form-control" id="lon" name="longitude" placeholder="Długość geograficzna">
+      <div id="map"></div>
+    </div>
+    <button type="submit" class="submitButton">Zapisz</button>
+</div>
+<script>
+  var checkBox = document.getElementById("checkbox");
+  var loc = document.getElementById("loc");
+  window.onload = function ()
+  {
+    checkBox.checked = false;
+    loc.style.display = "none";
+
+  }
+  function checkboxClicked()
+  {
+    if (checkBox.checked == true)
+    {
+      loc.style.display = "block";
+    } else
+    {
+      loc.style.display = "none";
+    }
+  }
+
+
+  var latField = document.getElementById("lat");
+  var lonField = document.getElementById("lon");
+
+  var map = L.map('map', { center: [{{ lat }}, {{ lon }}], zoom: 10 });
+  var lastMarker = L.marker([{{ lat }}, { { lon } }]).addTo(map)
+    .bindPopup("Tutaj jesteś")
+    .openPopup();
+
+  latField.value = {{ lat }};
+  lonField.value = {{ lon }};
+
+  map.on('click', function (e)
+  {
+    var coord = e.latlng;
+    var lat = coord.lat;
+    var lng = coord.lng;
+    latField.value = lat;
+    lonField.value = lng;
+
+
+    if (lastMarker)
+    {
+      map.removeLayer(lastMarker);
+    }
+    lastMarker = L.marker([coord.lat, coord.lng]).addTo(map)
+      .bindPopup("Wybrana lokalizacja")
+      .openPopup();
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+</script>
+{% endblock %}
