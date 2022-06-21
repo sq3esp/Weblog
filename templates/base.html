@@ -42,8 +42,8 @@
         </div>
         <div class="rightcolumn">
             <div class="card">
-                <h3>"{{ quote }}"</h3>
-                <h5>~{{ author }}</h5>
+                <h3>"{{ data.quote }}"</h3>
+                <h5>~{{ data.author }}</h5>
             </div>
             <div class="card">
                 <h2>O projekcie</h2>
@@ -52,13 +52,13 @@
             </div>
             <div class="card">
                 <article class="media">
-                    <img class="weather-icon" src="http://openweathermap.org/img/w/{{ icon }}.png">
+                    <img class="weather-icon" src="http://openweathermap.org/img/w/{{ data.icon }}.png">
                     <div class="content">
-                        <span class="title">{{ city }}</span>
+                        <span class="title">{{ data.city }}</span>
                         <br>
-                        <span class="subtitle">{{ temperature }}°C</span>
+                        <span class="subtitle">{{ data.temperature }}°C</span>
                         <br>
-                        {{ description }}
+                        {{ data.description }}
                     </div>
                 </article>
             </div>

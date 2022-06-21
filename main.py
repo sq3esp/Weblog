@@ -47,9 +47,7 @@ db.create_all() # create the tables
 
 @app.route("/")
 def main():
-    lat, lon = api.get_location() 
-    weather = api.get_weather(lat, lon)
-    quote = api.get_random_quote()
+    data = api.Api()
     posts = Post.query.all()
     posts.sort(key=lambda x: x.id, reverse=True) # sort the posts by id in descending order
     for post in posts:  # add weather to posts
@@ -57,7 +55,7 @@ def main():
             post.weather = api.get_weather(post.latitude, post.longitude) # add weather to the post
         else:
             post.weather = None
-    return render_template('main.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], posts=posts, loggedIn=loggedIn, username=username)
+    return render_template('main.html', posts=posts, loggedIn=loggedIn, username=username, data=data)
 
 
 @app.route('/favicon.ico')
@@ -67,11 +65,9 @@ def favicon():  # favicon for browser
 
 @app.route("/add", methods=["POST", "GET"]) 
 def add():  # add post
+    data = api.Api()
     if not loggedIn: # if the user is not logged in
-        lat, lon = api.get_location() 
-        weather = api.get_weather(lat, lon)
-        quote = api.get_random_quote()
-        return render_template('unauthorized.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], loggedIn=loggedIn, username=username)
+        return render_template('unauthorized.html', data=data, loggedIn=loggedIn, username=username)
     underForm = " "
     if request.method == "POST": # if the user submitted the form
         title = request.form["title"]
@@ -96,10 +92,7 @@ def add():  # add post
             print(e)
             underForm = "Podczas dodawania wystąpił błąd"
 
-    lat, lon = api.get_location()
-    weather = api.get_weather(lat, lon)
-    quote = api.get_random_quote()
-    return render_template("add.html", lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], underForm=underForm, loggedIn=loggedIn, username=username)
+    return render_template("add.html", data=data, underForm=underForm, loggedIn=loggedIn, username=username)
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -115,14 +108,13 @@ def login(): # login page
             global username
             username = user.login   # set the username variable to the login of the user
 
-    lat, lon = api.get_location()
-    weather = api.get_weather(lat, lon)
-    quote = api.get_random_quote()
-    return render_template('login.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], loggedIn=loggedIn, username=username)
+    data = api.Api()
+    return render_template('login.html', data=data, loggedIn=loggedIn, username=username)
 
 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup(): # signup page (used to create a new user)
+    data = api.Api() # get the data from the api
     if request.method == 'POST': # if the user submitted the form
         login = request.form['login']
         password = request.form['password']
@@ -138,15 +130,9 @@ def signup(): # signup page (used to create a new user)
             return redirect(url_for('login')) # redirect to the login page
         except Exception as e: # if the user already exists
             print(e)
-            lat, lon = api.get_location()
-            weather = api.get_weather(lat, lon)
-            quote = api.get_random_quote()
-            return render_template('signup.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], loggedIn=loggedIn, username=username, underForm="Podczas rejestracji wystąpił błąd, najprawdopodobnie użytkownik o takim loginie już istnieje")
+            return render_template('signup.html', data = data, loggedIn=loggedIn, username=username, underForm="Podczas rejestracji wystąpił błąd, najprawdopodobnie użytkownik o takim loginie już istnieje")
 
-    lat, lon = api.get_location()
-    weather = api.get_weather(lat, lon)
-    quote = api.get_random_quote()
-    return render_template('signup.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], loggedIn=loggedIn, username=username)
+    return render_template('signup.html', data = data, loggedIn=loggedIn, username=username)
 
 
 @app.route('/logout')
@@ -160,10 +146,8 @@ def logout(): # logout page
 
 @app.route('/unauthorized')
 def unauthorized(): # unauthorized page
-    lat, lon = api.get_location()
-    weather = api.get_weather(lat, lon)
-    quote = api.get_random_quote()
-    return render_template('unauthorized.html', lat=lat, lon=lon, city=weather[0], icon=weather[1], temperature=weather[2], description=weather[3], quote=quote[0], author=quote[1], loggedIn=loggedIn, username=username)
+    data = api.Api() # get the data from the api
+    return render_template('unauthorized.html', data = data, loggedIn=loggedIn, username=username)
 
 
 if __name__ == "__main__":

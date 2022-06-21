@@ -13,7 +13,7 @@
   <hr>
   <span class="subtitle">{{ post.weather.0 }}</span>
   <span class="subtitle"> {{ post.weather.2 }}&deg;C</span>
-  <img src="http://openweathermap.org/img/w/{{ icon }}.png">
+  <img src="http://openweathermap.org/img/w/{{ post.weather.1 }}.png">
   {{ post.weather.3 }}
   {% endif %}
 
@@ -21,7 +21,7 @@
 </div>
 {% endfor %}
 <script>
-  var map = L.map('map', { center: [{{ lat }}, {{ lon }}], zoom: 2 });
+  var map = L.map('map', { center: [{{ data.lat }}, {{ data.lon }}], zoom: 2 });
   {% for post in posts %}
   {% if post.latitude and post.longitude %}
   L.marker([{{ post.latitude }}, {{ post.longitude }}]).addTo(map).bindPopup("{{post.title}}");
